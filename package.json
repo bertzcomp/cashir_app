@@ -11,7 +11,8 @@
     "test": "node --test tests/*.test.js",
     "cap:add:android": "cap add android",
     "cap:sync": "cap sync android",
-    "android:debug": "npm run build && cap sync android && cd android && ./gradlew --no-daemon assembleDebug",
+    "cap:install:native": "node scripts/install-native-android.mjs",
+    "android:debug": "npm run build && cap sync android && npm run cap:install:native && cd android && ./gradlew --no-daemon assembleDebug",
     "build:preview": "node scripts/build-preview.mjs"
   },
   "dependencies": {

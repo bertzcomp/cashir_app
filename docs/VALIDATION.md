@@ -6,7 +6,7 @@ Tanggal pemeriksaan: 18 November 2026.
 
 - Node.js `v22.19.0` dan npm `10.9.3` tersedia.
 - JDK 21 tersedia; kedua source Java desktop berhasil dikompilasi ke direktori sementara `/tmp` dan file source aslinya tidak berubah.
-- `npm test`: **16/16 test lulus**, termasuk keselarasan katalog web dengan project Java fondasi baru, identitas source Java desktop, kontrak transaksi, CTA unduh APK, lockfile, kesamaan artifact web untuk job Android, dan urutan deploy.
+- `npm test` mencakup keselarasan katalog web dengan project Java fondasi baru, identitas source Java desktop, kontrak transaksi, CTA unduh APK khusus web, fitur cetak struk, lockfile, kesamaan artifact web untuk job Android, dan urutan deploy.
 - `node --check` lulus untuk `app/src/main.js`, seluruh modul domain, Service Worker, dan script preview.
 - `npm run build:preview` berhasil menyalin seluruh sumber web menjadi `web-preview/`; smoke test HTTP terakhir berhasil mengambil index, JS utama, dan Service Worker. Semua 13 entri precache menunjuk ke file yang tersedia.
 - SHA-256 `KasirAlfamidi.java/src/KasirAlfamidi.java` dan `desktop/src/KasirAlfamidi.java` identik: `034ca6cb427848b82ca3ad5eecce377315c89700f30a024a9a3e2f23527cd7f6`.
@@ -28,9 +28,10 @@ Workflow `.github/workflows/publish.yml` menjalankan `npm ci` dari lockfile ter-
 - Workflow GitHub Actions pada repository `bertzcomp/cashir_app` sudah berhasil menjalankan `npm ci`, 16 unit test, Vite production build, verifikasi `dist/`, Capacitor sync, dan Gradle `assembleDebug`.
 - Release `prototype-latest` sudah berisi `KasirAlfamidi.apk` beserta checksum SHA-256, dan workflow berhasil mengakses URL unduhan publik sebelum Pages dideploy.
 - Workflow memverifikasi integritas dan tanda tangan debug APK serta keberadaan bundle web/offline lengkap di `assets/public/` dalam APK.
+- Pipeline berikutnya juga memverifikasi bahwa bridge native `ReceiptPrinter` ikut terkompilasi ke `classes.dex` APK.
 - GitHub Pages berhasil dideploy ke `https://bertzcomp.github.io/cashir_app/`.
 - Job Pages melakukan smoke test HTTPS terhadap halaman utama, manifest PWA, konfigurasi tombol APK, Service Worker, precache manifest, dan seluruh asset yang tercantum dalam precache.
-- Pengujian instalasi/perilaku pada perangkat Android nyata belum dilakukan dan tidak diklaim berhasil.
+- Pengujian instalasi, dialog cetak, dan printer fisik pada perangkat Android nyata belum dilakukan dan tidak diklaim berhasil.
 - Pengujian browser interaktif/offline end-to-end tidak dapat dilakukan dari sesi ini karena alat browser dan cloud desktop tidak tersedia. Validasi PWA saat ini terdiri dari verifikasi build, precache manifest, dan deployment pipeline.
 
 Konfigurasi CI bukan bukti bahwa build/deployment telah berhasil; status ini harus diperbarui hanya setelah workflow berhasil dijalankan pada repository tujuan.

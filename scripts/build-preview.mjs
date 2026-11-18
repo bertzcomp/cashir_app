@@ -13,8 +13,8 @@ await cp(path.join(source, 'src'), path.join(output, 'src'), { recursive: true }
 const previewMain = path.join(output, 'src', 'main.js');
 const previewMainSource = await readFile(previewMain, 'utf8');
 await writeFile(previewMain, previewMainSource.replace(
-  "import { Capacitor } from '@capacitor/core';",
-  'const Capacitor = { isNativePlatform: () => false };'
+  "import { Capacitor, registerPlugin } from '@capacitor/core';",
+  'const Capacitor = { isNativePlatform: () => false };\nconst registerPlugin = () => ({});'
 ));
 await cp(path.join(source, 'public'), output, { recursive: true });
 

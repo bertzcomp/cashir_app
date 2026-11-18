@@ -125,6 +125,9 @@ jobs:
       - name: Sync the exact website build into Android
         run: npx cap sync android
 
+      - name: Install the native Android receipt printer bridge
+        run: npm run cap:install:native
+
       - name: Build installable debug APK
         run: cd android && ./gradlew --no-daemon --stacktrace assembleDebug
 
@@ -152,6 +155,7 @@ jobs:
           done
           grep -Eq '^assets/public/assets/.+\.css$' /tmp/kasir-apk-entries.txt
           grep -Eq '^assets/public/assets/.+\.js$' /tmp/kasir-apk-entries.txt
+          unzip -p artifacts/KasirAlfamidi.apk classes.dex | strings | grep -Fq 'ReceiptPrinter'
 
       - name: Create complete source and APK ZIP
         run: |

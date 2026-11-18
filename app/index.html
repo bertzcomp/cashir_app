@@ -27,7 +27,7 @@
         <div class="topbar-actions">
           <span class="version-tag">v<span id="app-version">1.0.0</span></span>
           <span class="connection-pill"><i id="connection-dot"></i><span id="connection-label">Memeriksa koneksi</span></span>
-          <a class="download-button" id="apk-download" href="#download-apk" aria-label="Unduh aplikasi Android APK">
+          <a class="download-button web-only" id="apk-download" href="#download-apk" aria-label="Unduh aplikasi Android APK">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 18v2h16v-2"/></svg>
             <span>INSTALL APK KE HP ANDA</span>
           </a>
@@ -117,18 +117,17 @@
                 <span class="step-indicator">03</span>
               </div>
               <div class="receipt-paper" id="receipt-paper">
-                <div class="receipt-brand">ALFAMIDI MINI MARKET</div>
-                <div class="receipt-subtitle">SISTEM KASIR SEDERHANA</div>
-                <div class="receipt-rule"></div>
                 <pre id="receipt-content" aria-live="polite">       ALFAMIDI MINI MARKET
      SISTEM KASIR SEDERHANA
 --------------------------------
  Silakan masukkan barang belanja
 --------------------------------
 </pre>
-                <div class="receipt-footer">Terima kasih telah berbelanja</div>
               </div>
               <div class="receipt-actions no-print">
+                <button id="print-receipt" class="secondary-button" type="button" disabled>
+                  <span aria-hidden="true">▣</span> Cetak Struk
+                </button>
                 <span id="receipt-status" class="receipt-status">Struk tersedia setelah pembayaran</span>
               </div>
             </section>

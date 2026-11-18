@@ -1,4 +1,4 @@
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { PRODUCTS } from './domain/products.js';
 import {
   addProduct, calculateItemCount, calculateTotal, clearCart,
@@ -10,6 +10,7 @@ import { formatRupiah } from './domain/format.js';
 const APP_VERSION = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : '1.0.0';
 const BUILD_ID = globalThis.KASIR_APP_CONFIG?.buildId ?? APP_VERSION;
 const CART_STORAGE_KEY = 'kasir-alfamidi-cart-v1';
+const ReceiptPrinter = registerPlugin('ReceiptPrinter');
 const INITIAL_RECEIPT = [
   '       ALFAMIDI MINI MARKET',
   '     SISTEM KASIR SEDERHANA',
@@ -36,6 +37,7 @@ const elements = {
   payButton: document.querySelector('#pay-button'),
   receiptContent: document.querySelector('#receipt-content'),
   receiptStatus: document.querySelector('#receipt-status'),
+  printReceipt: document.querySelector('#print-receipt'),
   toast: document.querySelector('#toast'),
   connectionDot: document.querySelector('#connection-dot'),
   connectionLabel: document.querySelector('#connection-label'),
@@ -116,8 +118,9 @@ function renderCart() {
 
 function renderPayment() {
   elements.changeAmount.textContent = formatRupiah(state.change);
-  elements.receiptStatus.textContent = state.paid ? 'Pembayaran berhasil · struk berhasil dibuat' : 'Struk tersedia setelah pembayaran';
+  elements.receiptStatus.textContent = state.paid ? 'Pembayaran berhasil · struk siap dicetak' : 'Struk tersedia setelah pembayaran';
   elements.receiptContent.textContent = state.receipt;
+  elements.printReceipt.disabled = !state.paid;
 }
 
 function invalidatePayment() {
@@ -156,6 +159,13 @@ function configureDownloadLink() {
     elements.apkDownload.setAttribute('aria-disabled', 'true');
     elements.apkDownload.title = 'Tautan unduhan aktif setelah repository GitHub dikonfigurasi dan APK dirilis.';
   }
+}
+
+function configurePlatformUI() {
+  const isNative = Capacitor.isNativePlatform();
+  document.body.classList.toggle('native-app', isNative);
+  elements.apkDownload.hidden = isNative;
+  if (!isNative) configureDownloadLink();
 }
 
 function configureDates() {
@@ -233,11 +243,31 @@ function handlePayment() {
   showToast(`Pembayaran berhasil. Kembalian ${formatRupiah(result.change)}.`, 'success');
 }
 
+async function handlePrintReceipt() {
+  if (!state.paid) {
+    showToast('Silakan proses pembayaran terlebih dahulu!', 'info');
+    return;
+  }
+
+  try {
+    if (Capacitor.isNativePlatform()) {
+      await ReceiptPrinter.printReceipt({ jobName: 'Struk Kasir Alfamidi' });
+    } else {
+      window.print();
+    }
+    showToast('Dialog cetak struk telah dibuka.', 'success');
+  } catch (error) {
+    console.error('Struk tidak dapat dicetak:', error);
+    showToast('Gagal membuka dialog cetak struk.', 'error');
+  }
+}
+
 function attachEvents() {
   elements.addForm.addEventListener('submit', handleAddProduct);
   elements.cartBody.addEventListener('click', handleCartAction);
   elements.clearCart.addEventListener('click', handleClearCart);
   elements.payButton.addEventListener('click', handlePayment);
+  elements.printReceipt.addEventListener('click', handlePrintReceipt);
   window.addEventListener('online', refreshNetworkStatus);
   window.addEventListener('offline', refreshNetworkStatus);
   elements.apkDownload.addEventListener('click', (event) => {
@@ -255,7 +285,7 @@ function initialize() {
   attachEvents();
   refreshNetworkStatus();
   configureDates();
-  configureDownloadLink();
+  configurePlatformUI();
   registerOfflineSupport();
 }
 
