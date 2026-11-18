@@ -155,7 +155,7 @@ Satu workflow `.github/workflows/publish.yml` menjalankan alur berurutan:
 4. Di **Settings → Actions → General**, pastikan workflow diizinkan berjalan dan `GITHUB_TOKEN` boleh melakukan write pada repository. Workflow sudah menetapkan `contents: write`, `pages: write`, dan `id-token: write`.
 5. Push commit ke `main` atau jalankan workflow `Build, publish website, and release Android APK` melalui tab Actions.
 
-Workflow berjalan pada GitHub-hosted runner yang menyiapkan Node.js, JDK 21, Android SDK API 36, Android Build Tools, dan Gradle wrapper Capacitor.
+Workflow berjalan pada GitHub-hosted runner yang menyiapkan Node.js, JDK 21, Android SDK API 36, Android Build Tools, dan Gradle wrapper Capacitor. Dependency Gradle disimpan dalam cache GitHub Actions dan build membatasi worker agar unduhan Maven lebih stabil.
 
 ### Alamat website dan APK
 
