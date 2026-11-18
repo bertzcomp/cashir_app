@@ -96,7 +96,7 @@ Alamat gratis GitHub Pages mengikuti pemilik dan nama repository:
 - Repository `charleshalawa08-source.github.io` → `https://charleshalawa08-source.github.io/`
 - Repository lain, misalnya `cashir_app` → `https://charleshalawa08-source.github.io/cashir_app/`
 
-`charleshalawa08-source.io` adalah custom domain tersendiri dan hanya dapat dipakai jika domain tersebut telah didaftarkan. Untuk custom domain, tambahkan file `app/public/CNAME` berisi domain tanpa `https://`, konfigurasi domain yang sama di **Settings → Pages**, lalu arahkan DNS sesuai petunjuk GitHub Pages. Vite akan menyalin file `CNAME` ke deployment.
+`charleshalawa08-source.io` adalah custom domain tersendiri dan hanya dapat dipakai jika domain tersebut telah didaftarkan. Karena proyek ini dideploy memakai GitHub Actions, konfigurasikan domain di **Settings → Pages → Custom domain**, verifikasi kepemilikan domain, lalu arahkan record DNS sesuai petunjuk GitHub Pages. File `CNAME` di source tidak diperlukan untuk metode deployment Actions ini.
 
 ### Preview browser tanpa dependency (opsional)
 
