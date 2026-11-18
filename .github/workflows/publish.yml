@@ -155,7 +155,8 @@ jobs:
           done
           grep -Eq '^assets/public/assets/.+\.css$' /tmp/kasir-apk-entries.txt
           grep -Eq '^assets/public/assets/.+\.js$' /tmp/kasir-apk-entries.txt
-          unzip -p artifacts/KasirAlfamidi.apk classes.dex | strings | grep -Fq 'ReceiptPrinter'
+          unzip -p artifacts/KasirAlfamidi.apk classes.dex | strings > /tmp/kasir-dex-strings.txt
+          grep -Fq 'ReceiptPrinter' /tmp/kasir-dex-strings.txt
 
       - name: Create complete source and APK ZIP
         run: |
