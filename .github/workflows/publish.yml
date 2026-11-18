@@ -1,0 +1,193 @@
+name: Build, publish website, and release Android APK
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: kasir-alfamidi-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-web:
+    name: Build website and shared web bundle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.x'
+          cache: npm
+
+      - name: Require a public repository for public Pages and APK downloads
+        env:
+          REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
+        run: |
+          if [ "$REPOSITORY_VISIBILITY" != "public" ]; then
+            echo "Repository must be public so GitHub Pages and the APK release are publicly accessible."
+            exit 1
+          fi
+
+      - name: Configure APK download URL
+        env:
+          REPOSITORY: ${{ github.repository }}
+          BUILD_ID: ${{ github.sha }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { writeFileSync } from 'node:fs';
+          const repository = process.env.REPOSITORY;
+          if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)) {
+            throw new Error(`Invalid GitHub repository: ${repository}`);
+          }
+          writeFileSync('app/public/site-config.js',
+            `window.KASIR_APP_CONFIG = ${JSON.stringify({ repository, releaseTag: 'prototype-latest', buildId: process.env.BUILD_ID })};\n`);
+          NODE
+
+      - name: Install exact locked dependencies
+        run: npm ci --no-audit --no-fund --no-progress
+
+      - name: Run cashier tests
+        run: npm test
+
+      - name: Run Vite production build
+        run: npm run build
+
+      - name: Verify production output and offline precache
+        run: npm run verify:dist
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+      - name: Share the exact Vite output with Android build
+        uses: actions/upload-artifact@v7
+        with:
+          name: kasir-web-build
+          path: dist/
+          if-no-files-found: error
+          retention-days: 1
+
+  build-android:
+    name: Package shared web bundle as Android APK
+    needs: build-web
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22.x'
+          cache: npm
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android SDK platform and build tools
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Download the exact Vite production output
+        uses: actions/download-artifact@v8
+        with:
+          name: kasir-web-build
+          path: dist
+
+      - name: Install exact locked dependencies
+        run: npm ci --no-audit --no-fund --no-progress
+
+      - name: Run cashier tests
+        run: npm test
+
+      - name: Generate Android project from Capacitor
+        run: npx cap add android
+
+      - name: Sync the exact website build into Android
+        run: npx cap sync android
+
+      - name: Build installable debug APK
+        run: cd android && ./gradlew --no-daemon --stacktrace assembleDebug
+
+      - name: Prepare APK and checksum
+        run: |
+          mkdir -p artifacts
+          cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/KasirAlfamidi.apk
+          sha256sum artifacts/KasirAlfamidi.apk > artifacts/KasirAlfamidi.apk.sha256
+
+      - name: Upload APK workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: KasirAlfamidi-Android-APK
+          path: |
+            artifacts/KasirAlfamidi.apk
+            artifacts/KasirAlfamidi.apk.sha256
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish rolling APK release for website download
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: prototype-latest
+          target_commitish: ${{ github.sha }}
+          name: Kasir Alfamidi — Latest Prototype APK
+          body: |
+            APK prototype terbaru yang dibangun otomatis dari branch `main`.
+            File ini ditandatangani dengan debug key dan ditujukan untuk demonstrasi/pengujian.
+          prerelease: true
+          make_latest: false
+          files: |
+            artifacts/KasirAlfamidi.apk
+            artifacts/KasirAlfamidi.apk.sha256
+          fail_on_unmatched_files: true
+          overwrite_files: true
+
+      - name: Verify the public APK download before Pages deployment
+        if: github.ref == 'refs/heads/main'
+        env:
+          APK_URL: https://github.com/${{ github.repository }}/releases/download/prototype-latest/KasirAlfamidi.apk
+        run: curl --fail --location --retry 8 --retry-delay 5 --retry-all-errors --output /dev/null "$APK_URL"
+
+      - name: Publish versioned release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          files: |
+            artifacts/KasirAlfamidi.apk
+            artifacts/KasirAlfamidi.apk.sha256
+          fail_on_unmatched_files: true
+          overwrite_files: true
+
+  deploy-pages:
+    name: Deploy website after APK release is ready
+    needs: [build-web, build-android]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v5

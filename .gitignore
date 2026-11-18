@@ -1,0 +1,40 @@
+# Node / Vite
+node_modules/
+dist/
+.vite/
+
+# Capacitor Android project is generated in CI by `npx cap add android`
+/android/
+
+# Capacitor / Android generated and local files
+android/.gradle/
+android/local.properties
+android/**/build/
+android/captures/
+android/.idea/
+*.jks
+*.keystore
+*.hprof
+
+# Java / NetBeans build outputs
+**/build/
+**/dist/
+**/nbproject/private/
+**/*.class
+*.jar
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs and local env
+*.log
+.env
+.env.*
+!.env.example
+# Optional generated no-dependency browser preview
+/web-preview/

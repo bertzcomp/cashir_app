@@ -1,0 +1,9 @@
+{
+  "appId": "id.co.kasiralfamidi.prototype",
+  "appName": "Kasir Alfamidi",
+  "webDir": "dist",
+  "backgroundColor": "#f7f7f8",
+  "android": {
+    "allowMixedContent": false
+  }
+}
