@@ -134,6 +134,25 @@ jobs:
           cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/KasirAlfamidi.apk
           sha256sum artifacts/KasirAlfamidi.apk > artifacts/KasirAlfamidi.apk.sha256
 
+      - name: Verify signed APK contains the offline web bundle
+        run: |
+          unzip -tq artifacts/KasirAlfamidi.apk
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs artifacts/KasirAlfamidi.apk
+          unzip -Z1 artifacts/KasirAlfamidi.apk > /tmp/kasir-apk-entries.txt
+          for required in \
+            assets/public/index.html \
+            assets/public/manifest.webmanifest \
+            assets/public/site-config.js \
+            assets/public/sw.js \
+            assets/public/precache-manifest.json \
+            assets/public/icons/icon-192.png \
+            assets/public/icons/icon-512.png
+          do
+            grep -Fxq "$required" /tmp/kasir-apk-entries.txt
+          done
+          grep -Eq '^assets/public/assets/.+\.css$' /tmp/kasir-apk-entries.txt
+          grep -Eq '^assets/public/assets/.+\.js$' /tmp/kasir-apk-entries.txt
+
       - name: Create complete source and APK ZIP
         run: |
           mkdir -p package/KasirAlfamidi-Publication-Ready/artifacts

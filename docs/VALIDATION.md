@@ -27,6 +27,7 @@ Workflow `.github/workflows/publish.yml` menjalankan `npm ci` dari lockfile ter-
 
 - Workflow GitHub Actions pada repository `bertzcomp/cashir_app` sudah berhasil menjalankan `npm ci`, 16 unit test, Vite production build, verifikasi `dist/`, Capacitor sync, dan Gradle `assembleDebug`.
 - Release `prototype-latest` sudah berisi `KasirAlfamidi.apk` beserta checksum SHA-256, dan workflow berhasil mengakses URL unduhan publik sebelum Pages dideploy.
+- Workflow memverifikasi integritas dan tanda tangan debug APK serta keberadaan bundle web/offline lengkap di `assets/public/` dalam APK.
 - GitHub Pages berhasil dideploy ke `https://bertzcomp.github.io/cashir_app/`.
 - Job Pages melakukan smoke test HTTPS terhadap halaman utama, manifest PWA, konfigurasi tombol APK, Service Worker, precache manifest, dan seluruh asset yang tercantum dalam precache.
 - Pengujian instalasi/perilaku pada perangkat Android nyata belum dilakukan dan tidak diklaim berhasil.
