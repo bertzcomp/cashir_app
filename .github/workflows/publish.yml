@@ -134,6 +134,17 @@ jobs:
           cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/KasirAlfamidi.apk
           sha256sum artifacts/KasirAlfamidi.apk > artifacts/KasirAlfamidi.apk.sha256
 
+      - name: Create complete source and APK ZIP
+        run: |
+          mkdir -p package/KasirAlfamidi-Publication-Ready/artifacts
+          git archive --format=tar HEAD | tar -x -C package/KasirAlfamidi-Publication-Ready
+          cp artifacts/KasirAlfamidi.apk package/KasirAlfamidi-Publication-Ready/artifacts/
+          cp artifacts/KasirAlfamidi.apk.sha256 package/KasirAlfamidi-Publication-Ready/artifacts/
+          cd package
+          zip -q -r ../artifacts/KasirAlfamidi-Publication-Ready.zip KasirAlfamidi-Publication-Ready
+          cd ..
+          sha256sum artifacts/KasirAlfamidi-Publication-Ready.zip > artifacts/KasirAlfamidi-Publication-Ready.zip.sha256
+
       - name: Upload APK workflow artifact
         uses: actions/upload-artifact@v7
         with:
@@ -141,6 +152,8 @@ jobs:
           path: |
             artifacts/KasirAlfamidi.apk
             artifacts/KasirAlfamidi.apk.sha256
+            artifacts/KasirAlfamidi-Publication-Ready.zip
+            artifacts/KasirAlfamidi-Publication-Ready.zip.sha256
           if-no-files-found: error
           retention-days: 30
 
@@ -159,6 +172,8 @@ jobs:
           files: |
             artifacts/KasirAlfamidi.apk
             artifacts/KasirAlfamidi.apk.sha256
+            artifacts/KasirAlfamidi-Publication-Ready.zip
+            artifacts/KasirAlfamidi-Publication-Ready.zip.sha256
           fail_on_unmatched_files: true
           overwrite_files: true
 
@@ -176,6 +191,8 @@ jobs:
           files: |
             artifacts/KasirAlfamidi.apk
             artifacts/KasirAlfamidi.apk.sha256
+            artifacts/KasirAlfamidi-Publication-Ready.zip
+            artifacts/KasirAlfamidi-Publication-Ready.zip.sha256
           fail_on_unmatched_files: true
           overwrite_files: true
 

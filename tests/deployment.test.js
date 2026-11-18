@@ -30,6 +30,8 @@ test('download button and CI use the same rolling release asset path', () => {
   assert.match(siteConfig, /releaseTag: 'prototype-latest'/);
   assert.match(workflow, /tag_name: prototype-latest/);
   assert.match(workflow, /artifacts\/KasirAlfamidi\.apk/);
+  assert.match(workflow, /artifacts\/KasirAlfamidi-Publication-Ready\.zip/);
+  assert.match(workflow, /git archive --format=tar HEAD/);
   assert.match(app, /releases\/download\/\$\{releaseTag\}\/KasirAlfamidi\.apk/);
   assert.match(workflow, /Verify the public APK download before Pages deployment/);
   assert.match(workflow, /curl --fail --location/);

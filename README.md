@@ -16,7 +16,7 @@ Prototype aplikasi kasir dengan **satu source UI dan logika web**. Website diban
 
 Cetak/printer, database, backend, autentikasi, serta sinkronisasi cloud tidak termasuk ruang lingkup prototype ini.
 
-> **Status paket workspace:** workflow publikasi sudah dikonfigurasi, tetapi repository GitHub belum ditautkan/didorong dari sesi ini. Karena itu ZIP source ini belum berisi APK dan belum memiliki URL website/unduhan publik. Tombol download di source lokal akan diaktifkan otomatis oleh workflow setelah APK berhasil dirilis pada repository GitHub publik.
+> **Status publikasi:** source tersedia di `bertzcomp/cashir_app`. GitHub Actions membangun website dan debug APK dari source web yang sama. Website, APK, checksum, dan ZIP lengkap diterbitkan otomatis setelah seluruh job berhasil.
 
 ## Struktur repository
 
@@ -120,7 +120,8 @@ Satu workflow `.github/workflows/publish.yml` menjalankan alur berurutan:
 2. Memverifikasi isi `dist/` dan daftar asset offline, lalu mengunggah `dist/` sebagai artifact sementara.
 3. Job Android mengunduh **hasil Vite yang sama**, memasang dependency dari lockfile ter-commit, memasangnya ke Capacitor, lalu menjalankan `assembleDebug` menggunakan Android SDK dan Gradle pada GitHub-hosted runner.
 4. APK diunggah sebagai workflow artifact dan ke GitHub Releases.
-5. Workflow menguji URL unduhan publik APK; hanya setelah URL tersebut merespons sukses, website diterbitkan ke GitHub Pages.
+5. Runner membuat ZIP lengkap berisi snapshot source commit beserta APK dan checksum, tanpa `node_modules` atau output build sementara.
+6. Workflow menguji URL unduhan publik APK; hanya setelah URL tersebut merespons sukses, website diterbitkan ke GitHub Pages.
 
 ### Menyiapkan repository
 
@@ -139,12 +140,21 @@ Setelah workflow pertama berhasil, GitHub Actions akan menampilkan URL website p
 - Repository bernama `OWNER.github.io`: `https://OWNER.github.io/`
 - Repository project biasa: `https://OWNER.github.io/REPOSITORY/`
 
-Nama `OWNER` dan `REPOSITORY` hanya dapat diisi setelah repository GitHub sebenarnya diketahui.
+Deployment repository ini tersedia di:
+
+- Website: <https://bertzcomp.github.io/cashir_app/>
+- Repository: <https://github.com/bertzcomp/cashir_app>
 
 Workflow membuat rolling pre-release dengan tag `prototype-latest`. Tombol website mengarah ke:
 
 ```text
-https://github.com/OWNER/REPOSITORY/releases/download/prototype-latest/KasirAlfamidi.apk
+https://github.com/bertzcomp/cashir_app/releases/download/prototype-latest/KasirAlfamidi.apk
+```
+
+ZIP lengkap source + APK:
+
+```text
+https://github.com/bertzcomp/cashir_app/releases/download/prototype-latest/KasirAlfamidi-Publication-Ready.zip
 ```
 
 APK yang dihasilkan juga tersedia pada tab **Actions → workflow run → Artifacts** selama 30 hari. Asset GitHub Release menjadi tautan download publik yang stabil dan diperbarui setiap kali branch `main` berhasil dibangun.
