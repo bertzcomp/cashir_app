@@ -208,3 +208,37 @@ jobs:
       - name: Deploy GitHub Pages artifact
         id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Smoke test deployed HTTPS site and offline assets
+        env:
+          SITE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          curl --fail --location --retry 8 --retry-delay 5 --retry-all-errors --output /dev/null "$SITE_URL"
+          node --input-type=module <<'NODE'
+          const root = new URL(process.env.SITE_URL);
+          if (root.protocol !== 'https:') throw new Error(`Pages URL is not HTTPS: ${root}`);
+
+          const required = ['', 'manifest.webmanifest', 'site-config.js', 'sw.js', 'precache-manifest.json'];
+          const responses = new Map();
+          for (const path of required) {
+            const url = new URL(path, root);
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) throw new Error(`Public asset failed: ${response.status} ${url}`);
+            responses.set(path, response);
+          }
+
+          const config = await responses.get('site-config.js').text();
+          if (!config.includes('"repository":"bertzcomp/cashir_app"') ||
+              !config.includes('"releaseTag":"prototype-latest"')) {
+            throw new Error('Public APK configuration does not target the final release.');
+          }
+
+          const precache = await responses.get('precache-manifest.json').json();
+          for (const asset of precache) {
+            const url = new URL(asset, root);
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) throw new Error(`Public precache asset failed: ${response.status} ${url}`);
+          }
+
+          console.log(`Public HTTPS smoke test passed for ${precache.length} offline assets at ${root}`);
+          NODE

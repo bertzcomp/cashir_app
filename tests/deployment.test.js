@@ -24,6 +24,8 @@ test('website deployment waits for a successful Android release', () => {
   assert.match(workflow, /needs: \[build-web, build-android\]/);
   assert.match(workflow, /actions\/deploy-pages@v5/);
   assert.match(workflow, /softprops\/action-gh-release@v3/);
+  assert.match(workflow, /Smoke test deployed HTTPS site and offline assets/);
+  assert.match(workflow, /Public HTTPS smoke test passed/);
 });
 
 test('download button and CI use the same rolling release asset path', () => {

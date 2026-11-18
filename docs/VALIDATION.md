@@ -23,11 +23,12 @@ Tanggal pemeriksaan: 18 November 2026.
 
 Workflow `.github/workflows/publish.yml` menjalankan `npm ci` dari lockfile ter-commit sebelum `npm run build`. Job website membangun dan memverifikasi `dist/` satu kali. Job Android mengunduh **hasil Vite yang sama**, menjalankan `npm ci`, menambahkan Capacitor Android, lalu membungkus artifact itu ke APK dengan Android SDK + Gradle. Pages baru dideploy setelah APK dirilis dan URL unduhan publiknya berhasil diuji.
 
-## Yang masih perlu dijalankan pada repository GitHub sebenarnya
+## Hasil publikasi GitHub
 
 - Workflow GitHub Actions pada repository `bertzcomp/cashir_app` sudah berhasil menjalankan `npm ci`, 16 unit test, Vite production build, verifikasi `dist/`, Capacitor sync, dan Gradle `assembleDebug`.
 - Release `prototype-latest` sudah berisi `KasirAlfamidi.apk` beserta checksum SHA-256, dan workflow berhasil mengakses URL unduhan publik sebelum Pages dideploy.
 - GitHub Pages berhasil dideploy ke `https://bertzcomp.github.io/cashir_app/`.
+- Job Pages melakukan smoke test HTTPS terhadap halaman utama, manifest PWA, konfigurasi tombol APK, Service Worker, precache manifest, dan seluruh asset yang tercantum dalam precache.
 - Pengujian instalasi/perilaku pada perangkat Android nyata belum dilakukan dan tidak diklaim berhasil.
 - Pengujian browser interaktif/offline end-to-end tidak dapat dilakukan dari sesi ini karena alat browser dan cloud desktop tidak tersedia. Validasi PWA saat ini terdiri dari verifikasi build, precache manifest, dan deployment pipeline.
 
