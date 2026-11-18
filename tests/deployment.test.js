@@ -15,8 +15,9 @@ test('website and Android pipeline share the same Vite build artifact', () => {
   assert.match(workflow, /apksigner.*verify --verbose --print-certs/);
   assert.match(workflow, /assets\/public\/precache-manifest\.json/);
   assert.match(workflow, /npm run cap:install:native/);
-  assert.match(workflow, /KasirAlfamidi\.apk classes\.dex/);
+  assert.match(workflow, /classes\(\[0-9\]\+\)\?\\\.dex/);
   assert.match(workflow, /grep -Fq 'ReceiptPrinter'/);
+  assert.match(workflow, /for attempt in 1 2 3/);
 });
 
 test('CI installs the committed lockfile and verifies the production output', () => {

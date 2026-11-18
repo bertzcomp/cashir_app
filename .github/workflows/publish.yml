@@ -129,7 +129,18 @@ jobs:
         run: npm run cap:install:native
 
       - name: Build installable debug APK
-        run: cd android && ./gradlew --no-daemon --stacktrace assembleDebug
+        run: |
+          for attempt in 1 2 3
+          do
+            if (cd android && ./gradlew --no-daemon --stacktrace assembleDebug); then
+              exit 0
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              exit 1
+            fi
+            echo "Gradle dependency download failed; retrying attempt $((attempt + 1)) of 3."
+            sleep $((attempt * 20))
+          done
 
       - name: Prepare APK and checksum
         run: |
@@ -155,7 +166,11 @@ jobs:
           done
           grep -Eq '^assets/public/assets/.+\.css$' /tmp/kasir-apk-entries.txt
           grep -Eq '^assets/public/assets/.+\.js$' /tmp/kasir-apk-entries.txt
-          unzip -p artifacts/KasirAlfamidi.apk classes.dex | strings > /tmp/kasir-dex-strings.txt
+          : > /tmp/kasir-dex-strings.txt
+          while IFS= read -r dex_file
+          do
+            unzip -p artifacts/KasirAlfamidi.apk "$dex_file" | strings >> /tmp/kasir-dex-strings.txt
+          done < <(grep -E '^classes([0-9]+)?\.dex$' /tmp/kasir-apk-entries.txt)
           grep -Fq 'ReceiptPrinter' /tmp/kasir-dex-strings.txt
 
       - name: Create complete source and APK ZIP
