@@ -38,6 +38,12 @@ jobs:
             exit 1
           fi
 
+      - name: Install exact locked dependencies
+        run: npm ci --no-audit --no-fund --no-progress
+
+      - name: Run cashier tests
+        run: npm test
+
       - name: Configure APK download URL
         env:
           REPOSITORY: ${{ github.repository }}
@@ -52,12 +58,6 @@ jobs:
           writeFileSync('app/public/site-config.js',
             `window.KASIR_APP_CONFIG = ${JSON.stringify({ repository, releaseTag: 'prototype-latest', buildId: process.env.BUILD_ID })};\n`);
           NODE
-
-      - name: Install exact locked dependencies
-        run: npm ci --no-audit --no-fund --no-progress
-
-      - name: Run cashier tests
-        run: npm test
 
       - name: Run Vite production build
         run: npm run build
